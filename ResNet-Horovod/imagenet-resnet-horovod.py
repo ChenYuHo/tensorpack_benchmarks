@@ -13,6 +13,7 @@ from tensorpack import *
 from tensorpack.tfutils import argscope, get_model_loader
 
 import horovod.tensorflow as hvd
+import wandb
 
 from imagenet_utils import (
     fbresnet_augmentor, get_val_dataflow, ImageNetModel, eval_classification)
@@ -179,6 +180,10 @@ if __name__ == '__main__':
     assert args.load is None
 
     hvd.init()
+    if hvd.rank() != 0:
+        os.environ['WANDB_MODE'] = 'dryrun'
+    wandb.init()
+    wandb.tensorboard.patch(save=False)
 
     if args.logdir is None:
         args.logdir = os.path.join('train_log', 'Horovod-{}GPUs-{}Batch'.format(hvd.size(), args.batch))
